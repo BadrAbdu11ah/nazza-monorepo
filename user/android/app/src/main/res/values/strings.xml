@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- معرف Web Client ID الخاص بقوقل لنظام أندرويد -->
+    <string name="default_web_client_id">146036295592-1e7q795jn5me9rljvgenrb9td07v05eq.apps.googleusercontent.com</string>
+</resources>
