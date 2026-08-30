@@ -8,9 +8,62 @@ use App\Models\User;
 use Illuminate\Support\Facades\Http; 
 use Illuminate\Support\Facades\Hash; 
 use Illuminate\Support\Str;
+use App\Models\OtpCode;
+use App\Services\SmsService;
 
 class AuthController extends Controller
 {
+    public function sendOtp(Request $request, SmsService $smsService)
+    {
+        $request->validate(['phone' => 'required']);
+
+        $code = rand(100000, 999999);
+
+        // 1. حفظ أو تحديث الرمز في قاعدة البيانات مع صلاحية 5 دقائق
+        OtpCode::updateOrCreate(
+            ['phone' => $request->phone],
+            ['code' => $code, 'expires_at' => now()->addMinutes(5)]
+        );
+
+        // 2. إرسال الرسالة عبر الخدمة
+        $smsService->send($request->phone, "رمز التحقق الخاص بك هو: {$code}");
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'تم إرسال رمز التحقق بنجاح',
+            'debug_code' => config('app.debug') ? $code : null,
+        ]);
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required',
+            'code'  => 'required',
+        ]);
+
+        // 1. البحث عن الرمز
+        $otpRecord = OtpCode::where('phone', $request->phone)
+                            ->where('code', $request->code)
+                            ->first();
+
+        // 2. الفحص والتأكد من الصلاحية
+        if (!$otpRecord || now()->greaterThan($otpRecord->expires_at)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'رمز التحقق غير صحيح أو منتهي الصلاحية',
+            ], 400);
+        }
+
+        // 3. حذف الرمز فوراً هنا بعد نجاح التحقق لمنع استخدامه مرة أخرى
+        $otpRecord->delete();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'تم التحقق بنجاح',
+        ]);
+    }
+
     // --- [ 1. تسجيل الدخول - Login ] ---
     public function login(Request $request)
     {

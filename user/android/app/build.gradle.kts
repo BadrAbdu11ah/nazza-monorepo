@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gevoel.frontend_user"
+    namespace = "com.nazza.frontend_user"
     compileSdk = 36
     ndkVersion = "29.0.14206865"
 
@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.gevoel.frontend_user"
+        applicationId = "com.nazza.frontend_user"
         minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

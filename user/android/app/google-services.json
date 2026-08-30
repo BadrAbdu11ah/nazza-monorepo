@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "756400063571",
+    "project_id": "nazza-f8415",
+    "storage_bucket": "nazza-f8415.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756400063571:android:bbca83302b7b4252a0f2a6",
+        "android_client_info": {
+          "package_name": "com.nazza.frontend_user"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwUxRrSbK7qq2ApobEFQWCk1xRFUfxwK8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

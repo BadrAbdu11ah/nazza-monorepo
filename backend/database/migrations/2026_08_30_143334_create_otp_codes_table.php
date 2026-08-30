@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::create('otp_codes', function (Blueprint $table) {
             $table->id();
-            $table->string("title");
-            $table->text("body");
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('phone')->index(); // رقم الهاتف مع الفهرسة لسرعة البحث
+            $table->string('code');           // رمز التحقق OTP
+            $table->timestamp('expires_at');  // تاريخ ووقت انتهاء الصلاحية
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('otp_codes');
     }
 };

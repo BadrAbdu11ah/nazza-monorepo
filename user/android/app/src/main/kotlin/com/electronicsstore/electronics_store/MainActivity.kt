@@ -1,4 +1,4 @@
-package com.gevoel.frontend_user
+package com.nazza.frontend_user
 
 import io.flutter.embedding.android.FlutterActivity
 
