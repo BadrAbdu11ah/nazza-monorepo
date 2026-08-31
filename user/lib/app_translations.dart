@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_user/data/static/app_text/choose_language_text.dart';
 
 class AppTranslations {
   // قاموس مركزي يحتوي على جميع النصوص المترجمة
-  static final Map<String, Map<String, String>> keys = {"ar": {}, "en": {}};
+  static final Map<String, Map<String, String>> keys = {
+    "ar": {...chooseLanguageAr},
+    "en": {...chooseLanguageEn},
+  };
 
   // // دالة لجلب النص المترجم بصورة آمنة تمنع توقف التطبيق
   static String translate(

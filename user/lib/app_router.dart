@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_user/core/constant/app_route.dart';
+import 'package:frontend_user/features/choose_language/view/choose_language.dart';
 
 class AppRouter {
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
@@ -20,6 +22,8 @@ class AppRouter {
     // }
 
     switch (finalRouteName) {
+      case AppRoute.chooseLanguage:
+        return MaterialPageRoute(builder: (_) => const ChooseLanguage());
       default:
         return null;
     }
