@@ -12,7 +12,20 @@
           "package_name": "com.nazza.frontend_user"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "756400063571-s4q12n3dmnqcc38l4pl2k2h3uqomr1tb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nazza.frontend_user",
+            "certificate_hash": "b951c8ef3543c40e958212cc87a41431cf559836"
+          }
+        },
+        {
+          "client_id": "756400063571-ecacg0pguddv90blgckhrb9o3es7m3ci.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCwUxRrSbK7qq2ApobEFQWCk1xRFUfxwK8"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "756400063571-ecacg0pguddv90blgckhrb9o3es7m3ci.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

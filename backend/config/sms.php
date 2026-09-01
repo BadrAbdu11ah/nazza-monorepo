@@ -3,8 +3,9 @@
 return [
     'driver' => env('SMS_DRIVER', 'log'),
 
-    'taqnyat' => [
-        'bearer_token' => env('TAQNYAT_BEARER_TOKEN'),
-        'sender'       => env('TAQNYAT_SENDER'),
+    'authentica' => [
+        'api_key'     => env('AUTHENTICA_API_KEY'),
+        'url'         => env('AUTHENTICA_API_URL'),
+        'template_id' => env('AUTHENTICA_TEMPLATE_ID'),
     ],
 ];

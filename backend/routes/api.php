@@ -27,17 +27,6 @@ Route::prefix('user')->group(function () {
         Route::post('/google-login', 'googleLogin');
         Route::post('/send-otp', 'sendOtp');
         Route::post('/verify-otp', 'verifyOtp');
-        Route::post('/login', 'login');
-        Route::post('/signup', 'signup');
-        Route::post('/auth/verify-code', 'verifyCode'); 
-        Route::post('/logout', 'logout');
-        // مسارات استعادة كلمة المرور
-        Route::prefix('forgetpassword')->group(function () {
-            Route::post('/checkemail',          'checkEmail');
-            Route::post('/verifycode',          'verifyCode');
-            Route::post('/reset-password',      'resetPassword');
-            Route::post('/reset-verify-code',   'resetVerifyCode'); 
-        });
     });
 });
 
@@ -46,7 +35,11 @@ Route::prefix('user')->group(function () {
 // -----------------------------------------------------------
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('user')->group(function () {
-        // الصفحة الرئيسية
+        
+        // تسجيل الخروج يقع هنا ليتمكن Laravel من استخراج التوكن وحذفه
+        Route::post('/logout', [AuthController::class, 'logout']);
+
+        // الصفحة الرئيسية والبحث
         Route::controller(HomeController::class)->group(function () {
             Route::get('/home', 'index');
             Route::get('/offers', 'offers');

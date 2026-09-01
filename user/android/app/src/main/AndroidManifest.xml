@@ -38,7 +38,7 @@
     </queries>
 
     <application
-        android:label="Nazza"
+        android:label="نزّا"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true">

@@ -11,20 +11,31 @@ class SmsService
     {
         $driver = config('sms.driver');
 
-        // عند الاشتراك الفعلي وتغيير Driver إلى taqnyat
-        if ($driver === 'taqnyat') {
+        if ($driver === 'authentica') {
+            $formattedPhone = preg_replace('/^0/', '966', trim($phone));
+            $apiUrl = config('sms.authentica.url');
+
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . config('sms.taqnyat.bearer_token'),
-            ])->post('https://api.taqnyat.sa/v1/messages', [
-                'recipients' => [$phone],
-                'sender'     => config('sms.taqnyat.sender'),
-                'body'       => $message,
+                'X-Authorization' => config('sms.authentica.api_key'),
+                'Accept'          => 'application/json',
+                'Content-Type'    => 'application/json',
+            ])->post($apiUrl, [
+                'phone'       => $formattedPhone,
+                'method'      => 'sms', // تحديد وسيلة الإرسال
+                'template_id' => config('sms.authentica.template_id'), // رقم القالب
             ]);
 
-            return $response->successful();
+            if ($response->failed()) {
+                Log::error("Authentica SMS Failed: ", [
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                ]);
+                return false;
+            }
+
+            return true;
         }
 
-        // في مرحلة التطوير (SMS_DRIVER=log): تُكتب الرسالة في storage/logs/laravel.log
         Log::info("SMS Mock Sent to [{$phone}]: {$message}");
         return true;
     }

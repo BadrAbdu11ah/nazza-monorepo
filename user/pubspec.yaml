@@ -72,6 +72,7 @@ dependencies:
     sdk: flutter
   awesome_dialog: ^3.3.0
   rating_dialog: ^2.0.4
+  intl_phone_field: ^3.2.0
 
 
 
@@ -112,6 +113,7 @@ flutter:
   assets:
     - assets/images/
     - assets/lotties/
+    - assets/svg/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

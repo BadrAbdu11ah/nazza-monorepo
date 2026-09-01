@@ -19,14 +19,21 @@ class AuthController extends Controller
 
         $code = rand(100000, 999999);
 
-        // 1. حفظ أو تحديث الرمز في قاعدة البيانات مع صلاحية 5 دقائق
+        // 1. حفظ أو تحديث الرمز في قاعدة البيانات
         OtpCode::updateOrCreate(
             ['phone' => $request->phone],
             ['code' => $code, 'expires_at' => now()->addMinutes(5)]
         );
 
-        // 2. إرسال الرسالة عبر الخدمة
-        $smsService->send($request->phone, "رمز التحقق الخاص بك هو: {$code}");
+        // 2. إرسال الرسالة وفحص النتيجة
+        $smsSent = $smsService->send($request->phone, "رمز التحقق الخاص بك هو: {$code}");
+
+        if (!$smsSent) {
+            return response()->json([
+                'status' => 'failure',
+                'message' => 'فشل إرسال رمز التحقق، يرجى التأكد من الرقم أو المحاولة لاحقاً',
+            ], 400);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -55,201 +62,33 @@ class AuthController extends Controller
             ], 400);
         }
 
-        // 3. حذف الرمز فوراً هنا بعد نجاح التحقق لمنع استخدامه مرة أخرى
+        // 3. حذف الرمز فوراً
         $otpRecord->delete();
+
+        // 4. (اختياري) إنشاء أو جلب المستخدم وإصدار التوكن
+        $user = User::firstOrCreate(
+            ['phone' => $request->phone],
+            [
+                'name' => 'User ' . Str::random(5),
+                'password' => Hash::make(Str::random(16)),
+                'approve' => true,
+                'role' => 'user'
+            ]
+        );
+
+        $user->tokens()->delete();
+        $token = $user->createToken('API Token')->plainTextToken;
 
         return response()->json([
             'status'  => 'success',
             'message' => 'تم التحقق بنجاح',
+            'token'   => $token,
+            'user'    => $user,
         ]);
     }
 
-    // --- [ 1. تسجيل الدخول - Login ] ---
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email'    => 'required|email', 
-            'password' => 'required'
-        ]);
 
-        $user = User::where('email', $request->email)->first();
 
-        // 1. التحقق من وجود الحساب
-        if (!$user) {
-            return response()->json(['status' => 'failure', 'errorKey' => 'emailNotFound']);
-        }
-
-        // 2. التحقق من تفعيل الحساب 
-        if (!$user->approve) { 
-            return response()->json(['status' => 'failure', 'errorKey' => 'accountNotActive']);
-        }
-
-        // 3. التحقق من صحة كلمة المرور 
-        if (!Hash::check($request->password, $user->password)) {
-            return response()->json(['status' => 'failure', 'errorKey' => 'passwordIncorrect']);
-        }
-
-        // 4. حذف التوكنات القديمة وتوليد توكن جديد باستخدام Sanctum
-        $user->tokens()->delete(); 
-        $token = $user->createToken('API Token')->plainTextToken;
-
-        return response()->json([
-            "status" => "success",
-            "token"  => $token, 
-            "user"   => $user
-        ]); 
-    }
-
-    // --- [ 2. تسجيل مستخدم جديد - Signup ] ---
-    public function signup(Request $request)
-    {
-        $request->validate([
-            'username' => 'required|string|max:255',
-            'email'    => 'required|email',
-            'password' => 'required|min:8',
-            'phone'    => 'required',
-        ]);
-
-        // 1. التحقق من تكرار الإيميل 
-        if (User::where('email', $request->email)->exists()) {
-            return response()->json(["status" => "failure", "errorKey" => "emailOrPhoneExists"]);
-        }
-
-        // 2. إنشاء المستخدم الجديد 
-        $verifyCode = rand(10000, 99999);
-        $user = User::create([
-            'name'        => $request->username,
-            'email'       => $request->email,
-            'password'    => $request->password,
-            'phone'       => $request->phone,
-            'verify_code' => $verifyCode,        
-            'approve'     => false,              
-            'role'        => 'user',
-        ]);
-
-        if (!$user) {
-            return response()->json(["status" => "failure"], 500);
-        }
-
-        return response()->json([
-            "status" => "success", 
-            "data"   => ["email" => $user->email]
-        ]);
-    }
-
-    // --- [ 3. فحص الإيميل لنسيان كلمة المرور - Forget Password ] ---
-    public function checkEmail(Request $request)
-    {
-        $request->validate(['email' => 'required|email']);
-
-        $user = User::where('email', $request->email)->first(); 
-
-        if (!$user) {
-            return response()->json(["status" => "failure", "errorKey" => "emailNotFound"]); 
-        }
-
-        $newCode = rand(10000, 99999);
-        $user->update(['verify_code' => $newCode]);
-
-        return response()->json([
-            "status"     => "success",
-            "data"       => $user,
-            "verifycode" => $newCode 
-        ]);
-    }
-
-    // --- [ 4. التحقق من رمز التفعيل - Verify Code ] ---
-    public function verifyCode(Request $request)
-    {
-        $request->validate([
-            'email'      => 'required|email', 
-            'verifycode' => 'required'
-        ]);
-
-        $user = User::where('email', $request->email)
-                    ->where('verify_code', $request->verifycode)
-                    ->first(); 
-
-        if (!$user) {
-            return response()->json(["status" => "failure", "errorKey" => "verificationCodeIncorrect"]);
-        }
-
-        // تحديث الحالة وتصفير كود التحقق
-        $user->update([
-            'approve'     => true, 
-            'verify_code' => null 
-        ]);
-
-        // توليد التوكن مباشرة بعد التفعيل الناجح للدخول الفوري
-        $token = $user->createToken('API Token')->plainTextToken;
-
-        return response()->json([
-            "status" => "success",
-            "token"  => $token, 
-            "data"   => $user
-        ]); 
-    }
-
-    // --- [ 5. إعادة تعيين كلمة المرور - Reset Password ] ---
-    public function resetPassword(Request $request)
-    {
-        $request->validate([
-            'email'    => 'required|email', 
-            'password' => 'required|min:8'
-        ]);
-
-        $user = User::where("email", $request->email)->first();
-
-        if (!$user) {
-            return response()->json(["status" => "failure", "errorKey" => "emailNotFound"]);
-        }
-
-        $user->update(["password" => $request->password]);
-
-        return response()->json(["status" => "success"]);
-    }
-
-    // --- [ 6. تحديث وحذف التوكنات القديمة - Reset Tokens ] ---
-    public function deleteOldTokens(Request $request)
-    {
-        $request->validate(['email' => 'required|email']);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) {
-            return response()->json(['status' => 'failure', 'errorKey' => 'emailNotFound']);
-        }
-
-        // حذف التوكنات القديمة وتوليد واحد نظيف
-        $user->tokens()->delete(); 
-        $token = $user->createToken('API Token')->plainTextToken;
-
-        return response()->json([
-            'status' => 'success',
-            'token'  => $token,
-            'user'   => $user
-        ]);
-    }
-
-    // --- [ 7. تسجيل الخروج - Logout ] ---
-    public function logout(Request $request)
-    {
-        $user = $request->user();
-
-        // 1. التحقق من وجود الحساب
-        if (!$user) {
-            return response()->json(['status' => 'failure', 'errorKey' => 'userNotFound']);
-        }
-
-        // 2. حذف التوكنات القديمة 
-        $user->tokens()->delete(); 
-
-        return response()->json([
-            "status" => "success"
-        ]); 
-    }
-
-    // --- [ 8. تسجيل الدخول عبر قوقل - Google Login ] ---
     public function googleLogin(Request $request)
     {
         // 1. التحقق من وجود id_token القادم من Flutter
@@ -327,5 +166,25 @@ class AuthController extends Controller
             // بيانات المستخدم للتوافق مع فلاتر
             "data"   => $user 
         ]);
+    }
+
+    
+
+    // --- [ 7. تسجيل الخروج - Logout ] ---
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        // 1. التحقق من وجود الحساب
+        if (!$user) {
+            return response()->json(['status' => 'failure', 'errorKey' => 'userNotFound']);
+        }
+
+        // 2. حذف التوكنات القديمة 
+        $user->tokens()->delete(); 
+
+        return response()->json([
+            "status" => "success"
+        ]); 
     }
 }

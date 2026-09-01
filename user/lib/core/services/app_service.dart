@@ -38,7 +38,7 @@ class AppService {
     // // 5. تهيئة Google Sign In مع Web Client ID
     await GoogleSignIn.instance.initialize(
       serverClientId:
-          '146036295592-1e7q795jn5me9rljvgenrb9td07v05eq.apps.googleusercontent.com',
+          '756400063571-ecacg0pguddv90blgckhrb9o3es7m3ci.apps.googleusercontent.com',
     );
   }
 }

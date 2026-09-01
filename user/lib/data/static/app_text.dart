@@ -4,6 +4,21 @@ class AppText {
   static const arabic = "arabic";
   static const english = "english";
 
+  // ---------- Login ----------
+  static const signIn = "signIn";
+  static const welcomeBack = "welcomeBack";
+  static const loginDescription = "loginDescription";
+  // email: يستخدم في كل صفحة فيه إيميل لتشابه أسماء المفاتيح
+  static const enterEmail = "enterEmail";
+  static const email = "email";
+  // password: يستخدم في كل صفحة فيه باسورد لتشابه أسماء المفاتيح
+  static const enterPassword = "enterPassword";
+  static const password = "password";
+
+  static const forgetPassword = "forgetPassword";
+  static const dontHaveAccount = "dontHaveAccount";
+  static const goSignUp = "goSignUp";
+
   // ---------- Validation ----------
   static const invalidUsername = "invalidUsername";
   static const invalidEmail = "invalidEmail";

@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
       builder: (context, state) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Nazza',
+          title: 'نزّا',
 
           // تطبيق اللغة والثيم القادمة من الـ State الخاص بالـ Bloc
           locale: state.locale,
